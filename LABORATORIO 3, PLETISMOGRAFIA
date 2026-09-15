@@ -1,0 +1,349 @@
+##CALCULO AMBULATORIO DEL INDICE PLETISMOGRAFICO
+
+**Luz Marina Valderrama-5600741.**
+
+## INTRODUCCION
+
+
+### Objetivo General: 
+
+### Objetivos Específicos
+• 
+
+## METODOLOGIA
+### Revisión de la actividad electrodérmica
+
+
+
+### Consideraciones de seguridad eléctrica
+
+La guía establece que la corriente aplicada al sujeto debe mantenerse por debajo de 1 mA. Para el diseño se utilizó una alimentación de 3,3 V, correspondiente al nivel de alimentación empleado por la ESP32.
+
+La condición extrema solicitada por la guía considera:
+
+Rskin = 0Ω
+
+Por esta razón, no es suficiente considerar únicamente la resistencia de la piel. Se debe incorporar una resistencia limitadora en serie que limite la corriente incluso en dicha condición.
+
+Aplicando la ley de Ohm:
+
+I= V/R
+	​
+Para garantizar:
+
+I≤1mA
+
+con:
+
+V=3.3V
+
+se obtiene:
+
+R≥ 3.3/0.001
+
+R≥3300Ω
+
+Por lo tanto, teóricamente se requiere como mínimo una resistencia de 3,3 kΩ bajo la condición extrema de cortocircuito de la piel. En la práctica se debe seleccionar un valor superior para disponer de margen de seguridad.
+
+La consideración de la magnitud y duración de la corriente es coherente con la norma IEC 60479-1, que establece que los efectos fisiológicos de una corriente dependen, entre otros factores, de su magnitud, duración, trayectoria y de la impedancia del cuerpo [5].
+
+### Selección de la región anatómica
+
+Para la adquisición de GSR se utilizaron electrodos colocados sobre la mano. Las regiones palmares y los dedos son sitios tradicionalmente utilizados debido a la elevada densidad de glándulas sudoríparas ecrinas y a que producen señales electrodermales relativamente pronunciadas [6].
+
+Los dedos presentan además una buena sensibilidad para detectar respuestas fásicas. Estudios experimentales han encontrado que las mediciones realizadas en los dedos presentan respuestas rápidas y una buena correlación dentro del mismo sujeto [7].
+
+Sin embargo, esta ubicación presenta una desventaja durante actividades como escribir o caminar, debido a que el movimiento de las manos puede introducir artefactos. Esta es una limitación conocida de los sistemas portátiles de EDA [7], [8].
+
+Por esta razón, durante las pruebas se procuró mantener los electrodos firmemente sujetos y reducir movimientos innecesarios durante la adquisición.
+
+### Montaje del dispositivo
+
+El sistema desarrollado estuvo compuesto principalmente por:
+
+• ESP32.
+• Sensor GSR.
+• Electrodos.
+• Cables de conexión.
+• Fuente de alimentación mediante power bank.
+• Computador con MATLAB.
+• Comunicación Bluetooth.
+
+El sensor GSR fue conectado a la ESP32 mediante:
+
+VCC → 3,3 V
+GND → GND
+Salida del sensor → GPIO 34
+
+El GPIO 34 fue utilizado como entrada analógica para realizar la adquisición de la señal.
+
+La ESP32 realizó la lectura del valor analógico y posteriormente transmitió los datos mediante Bluetooth al computador.
+### Programación de la ESP32
+
+Se utilizó la versión 2.0.11 del paquete ESP32 de Espressif Systems en Arduino IDE.
+
+El programa final se encargó de:
+
+1. Inicializar la comunicación Bluetooth.
+2. Configurar el GPIO 34 como entrada analógica.
+3. Realizar continuamente la lectura del sensor GSR.
+4. Enviar el valor obtenido mediante Bluetooth.
+5. Mantener la adquisición durante la prueba.
+
+La estructura fundamental empleada fue:
+
+    #include "BluetoothSerial.h"
+
+    BluetoothSerial SerialBT;
+
+    const int GSR_PIN = 34;
+    
+    void setup()
+    {
+        Serial.begin(9600);
+        SerialBT.begin("GSR_ESP32");
+        analogReadResolution(10);
+    }
+    
+    void loop()
+    {
+        int gsr = analogRead(GSR_PIN);
+
+    SerialBT.println(gsr);
+
+    delay(20);
+    }
+La resolución del ADC se estableció en 10 bits, por lo que los valores adquiridos se encontraron aproximadamente entre 0 y 1023 ADC.
+
+La transmisión Bluetooth permitió eliminar la conexión física entre la ESP32 y el computador durante la adquisición final, utilizando la alimentación independiente mediante power bank.
+
+### Comunicación inalámbrica
+
+Una vez programada la ESP32, se estableció la comunicación Bluetooth con el computador mediante el dispositivo denominado:
+
+  GSR_ESP32
+
+El computador creó un puerto COM asociado al enlace Bluetooth. MATLAB utilizó dicho puerto para recibir los datos enviados por la ESP32.
+
+Durante la configuración se presentaron inicialmente problemas con los puertos COM y con la conexión Bluetooth. Finalmente se consiguió establecer comunicación y recibir correctamente los valores GSR en MATLAB.
+
+### Adquisición y procesamiento en MATLAB
+
+MATLAB se utilizó para recibir los datos provenientes de la ESP32, generar la gráfica en tiempo real y almacenar los resultados.
+
+El programa se configuró para adquirir aproximadamente:
+
+  Fs = 50Hz
+
+durante:
+
+T=60s
+
+por lo que se esperaban aproximadamente:
+
+N=FsT = 50(60)=3000
+
+muestras.
+
+Los datos fueron almacenados en vectores de tiempo y GSR.
+
+Posteriormente se aplicó un suavizado mediante media móvil:
+
+    xf = movmean(x,10);
+
+Este procesamiento permitió reducir pequeñas fluctuaciones rápidas y facilitar la identificación de la tendencia general de la señal.
+
+A partir de la señal suavizada se estimó la componente tónica:
+
+    SCL = mean(xf);
+
+y se calculó una componente transitoria aproximada:
+
+    SCR = xf - SCL;
+
+De esta forma fue posible observar tanto la variación lenta de la señal como las respuestas transitorias.
+
+### Calibración
+
+Antes de realizar la prueba final se realizaron mediciones en reposo y durante actividades destinadas a producir cambios en la activación fisiológica.
+
+Durante las primeras pruebas se observaron valores cercanos a:
+
+• Mínimo: 934 ADC
+• Máximo: 971 ADC
+• Promedio: 947,85 ADC
+• SCL: 947,85 ADC
+• SCR máxima: 7,95 ADC
+
+Posteriormente se realizaron pruebas adicionales para establecer rangos de clasificación.
+
+Los datos experimentales mostraron que el valor absoluto de GSR podía desplazarse durante la prueba. Por este motivo, la clasificación no se interpretó únicamente como un valor fisiológico universal, sino como una clasificación experimental relativa a la línea base del sujeto.
+
+Esto es importante porque el nivel de conductancia puede variar entre individuos y también puede verse afectado por temperatura, humedad, movimiento, presión de los electrodos y condiciones de contacto [8], [9].
+
+### Clasificación del nivel de estrés
+
+Se implementó una clasificación experimental en MATLAB mediante tres niveles:
+
+• POCO
+• MODERADO
+• ELEVADO
+
+Los umbrales se determinaron a partir de los valores observados durante las pruebas de calibración y posteriormente se utilizaron en la prueba final.
+
+El programa recibía cada muestra y determinaba el nivel correspondiente. En la consola se mostraba, por ejemplo:
+
+      GSR: 928 ADC   Nivel: MODERADO
+      GSR: 916 ADC   Nivel: POCO
+      GSR: 893 ADC   Nivel: ELEVADO
+
+La clasificación se utilizó como indicador relativo de activación fisiológica y no como diagnóstico clínico de estrés.
+## RESULTADOS
+### Adquisición de la señal GSR
+
+El sistema consiguió adquirir la señal GSR mediante la ESP32 y transmitirla inalámbricamente al computador.
+
+Durante las primeras mediciones se observaron valores aproximadamente entre 934 y 971 ADC en condiciones de reposo.
+
+En las pruebas posteriores se observaron variaciones mayores. En una de las adquisiciones se registraron valores desde aproximadamente 1002 ADC hasta 939 ADC, mostrando una variación suficiente para diferenciar diferentes estados de activación.
+
+### Respuesta durante reposo y respiración
+
+Durante las pruebas de respiración se observó que una inspiración rápida producía un cambio apreciable en la señal. Sin embargo, después del pico la señal no siempre regresaba exactamente al mismo valor inicial.
+
+Este comportamiento no necesariamente representa un error del sistema. La componente tónica de la EDA puede presentar cambios lentos y la recuperación de una respuesta fásica puede tomar tiempo [4]. Además, la señal puede verse afectada por la respiración, movimiento, contacto de los electrodos y otros factores fisiológicos [8].
+
+Por lo tanto, el retorno de la señal no debe interpretarse obligatoriamente como una recuperación instantánea hasta exactamente el mismo valor de reposo.
+
+### Prueba de actividad cognitiva
+
+Durante la prueba final se observó un comportamiento más acorde con el objetivo de la práctica.
+
+En la consola se obtuvieron secuencias como:
+
+    GSR: 935 ADC   Nivel: ELEVADO
+    GSR: 928 ADC   Nivel: MODERADO
+    GSR: 916 ADC   Nivel: POCO
+
+Durante los momentos en los que se realizó una actividad mental que requería mayor concentración se observaron cambios en el nivel de la señal y clasificación como ELEVADO.
+
+Posteriormente, al disminuir la demanda cognitiva, la señal descendió gradualmente y pasó por los niveles MODERADO y POCO.
+
+Esto permitió observar cambios tanto ascendentes como descendentes de la señal durante una misma adquisición.
+
+### Resultados de la prueba final
+
+Los resultados registrados fueron:
+
+  RESULTADOS PRUEBA GSR
+
+Parámetro	              Resultado
+Línea base	             992,03 ADC
+Mínimo                   939 ADC
+Máximo	                 1002 ADC
+Promedio	               958,40 ADC
+
+Los datos fueron almacenados en:
+
+• GSR_prueba_final.csv
+• GSR_prueba_final.mat
+
+La diferencia entre el máximo y mínimo registrado fue:
+
+ΔGSR=1002−939
+ΔGSR=63 ADC
+	​
+Este rango muestra que durante la prueba se produjo una variación considerable respecto al rango de fluctuación observado durante algunas condiciones de reposo.
+
+### Componentes SCL y SCR
+
+La señal presentó una variación lenta de su nivel basal, correspondiente a la componente tónica o SCL, sobre la cual aparecieron variaciones rápidas asociadas con la componente fásica o SCR.
+
+Este comportamiento coincide con la descripción utilizada habitualmente en el análisis de EDA, donde el SCL representa cambios lentos mientras que las SCR representan respuestas transitorias ante eventos o estímulos [3], [4].
+
+## ANÁLISIS DE RESULTADOS
+  Análisis 1. Eficacia del sistema para monitoreo ambulatorio
+
+El sistema desarrollado permitió realizar una medición continua y portátil de la respuesta galvánica cutánea y transmitir los datos de manera inalámbrica.
+
+Una de las principales ventajas fue que la ESP32 pudo funcionar alimentada mediante una power bank, evitando que el sujeto permaneciera conectado físicamente al computador.
+
+Los sistemas portátiles de EDA son una alternativa utilizada para realizar mediciones fuera de condiciones estrictamente de laboratorio; sin embargo, la calidad de la señal puede verse afectada por movimiento, colocación de electrodos, temperatura, humedad y otros factores [8], [10].
+
+Por lo tanto, el dispositivo desarrollado resulta apropiado como prototipo académico de monitoreo, aunque sería necesario realizar una validación más rigurosa antes de considerarlo un sistema de medición clínica.
+
+  Análisis 2. Alcance y limitaciones del sistema
+
+El principal alcance del sistema es permitir observar cambios relativos de la actividad electrodérmica durante diferentes situaciones.
+
+Los resultados obtenidos muestran que el sistema puede identificar cambios durante actividades cognitivas. Esto es consistente con investigaciones donde la EDA ha mostrado sensibilidad ante tareas que producen estrés cognitivo [11].
+
+Sin embargo, la GSR no mide directamente el estrés psicológico. La señal representa principalmente cambios relacionados con la activación autonómica y puede verse modificada por diferentes factores fisiológicos y ambientales [1], [8].
+
+Por ello, un aumento de GSR debe interpretarse como un aumento de activación fisiológica, y no necesariamente como una prueba definitiva de estrés.
+
+### ¿Por qué la señal tarda en regresar a su nivel inicial?
+
+Durante las pruebas se observó que, después de producirse una respuesta elevada, la señal podía permanecer durante un tiempo en un nivel diferente antes de regresar hacia valores menores.
+
+Esto puede explicarse por la propia dinámica de la EDA. Las respuestas fásicas presentan una fase de aumento y posteriormente una fase de recuperación, mientras que el componente tónico puede cambiar lentamente durante períodos de varios segundos o minutos [4].
+
+Además, la recuperación puede verse afectada por el estado fisiológico del sujeto y por las condiciones de medición.
+
+Por tanto, que la señal no vuelva inmediatamente al valor inicial no implica necesariamente que el sensor esté funcionando incorrectamente.
+
+### Relación entre actividad cognitiva y GSR
+
+Durante la prueba final se observó que, al realizar actividades que requerían mayor concentración, aparecieron periodos clasificados como ELEVADO.
+
+Posteriormente se observaron periodos MODERADOS y POCO cuando la activación disminuía.
+
+Este resultado es compatible con investigaciones que han demostrado sensibilidad de la EDA ante el estrés cognitivo [11]. La explicación fisiológica propuesta es que una tarea mental exigente puede aumentar la activación del sistema nervioso simpático, lo cual puede modificar la actividad de las glándulas sudoríparas y producir cambios en la conductancia cutánea [1], [3].
+
+No obstante, la respuesta no debe atribuirse exclusivamente al estrés, debido a que movimiento, respiración y otros factores también pueden generar variaciones en la EDA [8].
+
+### Influencia del movimiento
+
+La señal presentó fluctuaciones durante algunas pruebas. Esto es especialmente relevante porque el sistema fue diseñado como dispositivo vestible.
+
+Los movimientos pueden modificar la presión y el contacto entre los electrodos y la piel, produciendo cambios que no necesariamente corresponden a una respuesta fisiológica real. La literatura identifica específicamente el movimiento como una de las fuentes importantes de artefactos en mediciones portátiles de EDA [8].
+
+Esto representa una de las principales limitaciones del prototipo.
+
+### Hipótesis fisiológica
+
+A partir de los resultados obtenidos se plantea la siguiente hipótesis:
+
+Cuando una persona realiza una actividad que requiere mayor concentración o genera una mayor activación emocional, aumenta la activación del sistema nervioso simpático, lo que puede incrementar la actividad de las glándulas sudoríparas y producir cambios detectables en la conductancia de la piel.
+
+Esta hipótesis es coherente con la utilización de la EDA como indicador periférico de activación simpática [1], [3].
+
+## CONCLUSIONES
+1. Se desarrolló un prototipo vestible basado en una ESP32 y un sensor GSR, capaz de adquirir continuamente variaciones de la conductancia de la piel y transmitirlas inalámbricamente a MATLAB.
+2. Se identificaron las componentes tónica (SCL) y fásica (SCR) de la señal, observándose una variación lenta del nivel basal sobre la cual aparecieron respuestas transitorias.
+3. La prueba final presentó un rango experimental de 939 a 1002 ADC, con una diferencia máxima de 63 ADC, evidenciando que el sistema fue capaz de detectar cambios de la señal durante diferentes condiciones.
+4. Durante actividades cognitivas se observaron cambios en la señal y periodos clasificados como ELEVADO, seguidos posteriormente por estados MODERADOS y POCO, lo cual es compatible con la respuesta fisiológica esperada ante cambios en la activación simpática.
+5. Se comprobó que la señal no necesariamente retorna inmediatamente al mismo valor de línea base después de una respuesta elevada, debido a la dinámica de recuperación de la EDA y a factores fisiológicos y de medición.
+6. El sistema constituye un prototipo funcional para monitoreo académico de cambios relativos en la actividad electrodérmica. Sin embargo, la GSR por sí sola no permite establecer de manera absoluta el nivel psicológico de estrés, por lo que para aplicaciones más robustas sería conveniente combinarla con otras variables fisiológicas.
+7. El desarrollo permitió aplicar conceptos de instrumentación biomédica, adquisición de señales, procesamiento digital, comunicación inalámbrica y análisis fisiológico mediante un dispositivo embebido.
+## REFERENCIAS
+
+[1] A. H. C. van der Kraaij et al., “Role and Status of Biomarkers in Technostress Research: A Systematic Review,” International Journal of Environmental Research and Public Health, 2024.
+
+[2] M. F. M. Al-Nafjan et al., “Smart Devices and Wearable Technologies to Detect and Monitor Mental Health Conditions and Stress: A Systematic Review,” Sensors, vol. 21, 2021.
+
+[3] A. Posada-Quintero and K. Chon, “Innovations in Electrodermal Activity Data Collection and Signal Processing: A Systematic Review,” Sensors, vol. 20, no. 2, 2020.
+
+[4] W. Boucsein et al., “Publication recommendations for electrodermal measurements,” Psychophysiology, vol. 49, no. 8, pp. 1017–1034, 2012, doi: 10.1111/j.1469-8986.2012.01384.x.
+
+[5] International Electrotechnical Commission, IEC 60479-1:2018, Effects of current on human beings and livestock—Part 1: General aspects, 2018.
+
+[6] R. McNaboe and H. Posada-Quintero, “Identifying Optimal Electrodermal Activity Locations in the Torso for Wearable Belt Monitors: Preliminary Results,” in Proc. 46th Annual International Conference of the IEEE Engineering in Medicine and Biology Society (EMBC), 2024, doi: 10.1109/EMBC53108.2024.10782573.
+
+[7] A. R. Posada-Quintero et al., “Comparison of Electrodermal Activity from Multiple Body Locations Based on Standard EDA Indices' Quality and Robustness against Motion Artifact,” Sensors, vol. 22, no. 9, 3177, 2022, doi: 10.3390/s22093177.
+
+[8] G. A. S. et al., “Electrodermal activity measurements: a review of artifacts,” Physiological Measurement, 2026, doi: 10.1088/1361-6579/ae7bae.
+
+[9] R. Picard et al., “A standardized validity assessment protocol for physiological signals from wearable technology: Methodological underpinnings and an application to the E4 biosensor,” Physiological Measurement, 2019.
+
+[10] M. H. van der Kooij et al., “Wearables measuring electrodermal activity to assess perceived stress in care: a scoping review,” 2023.
