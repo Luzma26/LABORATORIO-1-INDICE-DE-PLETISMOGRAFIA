@@ -14,347 +14,540 @@ Desarrollar un sistema de medición continua del índice pletismográfico quirú
 
 • Validar el funcionamiento del sistema desarrollado mediante un método que induzca una respuesta fisiológica similar a la que produce el dolor agudo.
 
+## MARCO TEORICO
+### Fotopletismografia
+
+La fotopletismografía es una técnica óptica utilizada para registrar variaciones de volumen sanguíneo en un tejido. Su funcionamiento se basa en iluminar el tejido mediante una fuente de luz y medir, mediante un fotodetector, las variaciones en la luz recibida como consecuencia de los cambios en la absorción y reflexión producidos por el flujo sanguíneo [5].
+
+La señal PPG contiene una componente pulsátil, denominada componente AC, relacionada principalmente con las variaciones de volumen sanguíneo producidas por cada ciclo cardíaco, y una componente de baja frecuencia o DC relacionada con las características estáticas del tejido y otros factores fisiológicos [5]. Debido a esta relación con el ciclo cardíaco, la señal permite determinar características como los máximos de cada pulso, la amplitud de la pulsación y el intervalo entre pulsaciones.
+
+Para el desarrollo de la práctica se utilizó la configuración de reflectancia, en la cual la fuente luminosa y el detector se encuentran ubicados en el mismo lado del tejido. Esta configuración permite obtener una señal relacionada con los cambios del volumen sanguíneo periférico del dedo.
+
+### Indice plestismografico quirúrgico
+
+El Surgical Pleth Index (SPI), inicialmente denominado Surgical Stress Index, fue desarrollado como un indicador basado en la señal pletismográfica para estimar cambios relacionados con el estímulo nociceptivo durante anestesia general [2]. El índice utiliza dos características principales de la señal: la amplitud de la onda pletismográfica (PPGA) y el intervalo entre latidos (HBI).
+
+La formulación utilizada en esta práctica corresponde a:
+
+\[
+SPI=100-(0.7PPGA_{norm}+0.3HBI_{norm})
+\]
+
+donde \(PPGA_{norm}\) corresponde a la amplitud de pulso normalizada y \(HBI_{norm}\) corresponde al intervalo entre latidos normalizado [2].
+
+La normalización permite expresar ambas variables dentro de un rango común. De esta forma, el SPI obtenido también se encuentra entre 0 y 100. Un aumento del tono simpático puede producir vasoconstricción periférica y modificaciones de la frecuencia cardíaca, reduciendo la amplitud pletismográfica y el intervalo entre pulsaciones; estos cambios pueden conducir a un incremento del SPI [3].
+
+En estudios perioperatorios se ha utilizado frecuentemente un intervalo aproximado de 20–50 como referencia de adecuada analgesia durante anestesia general, aunque este intervalo no debe interpretarse como un límite universal ni como una medida directa de la intensidad subjetiva del dolor [3], [6].
+
+### Cold Pressor test
+
+El Cold Pressor Test es una prueba fisiológica utilizada para provocar una respuesta cardiovascular mediante la exposición de una extremidad al frío. La aplicación del estímulo produce activación del sistema nervioso simpático, aumento de la resistencia vascular periférica y modificaciones de variables cardiovasculares como la frecuencia cardíaca y la presión arterial [4], [7].
+
+En estudios experimentales, la inmersión de la mano en agua fría ha demostrado generar una respuesta simpática y modificaciones cardiovasculares medibles [4]. Por esta razón, el CPT puede emplearse como estímulo controlado para comprobar si un sistema basado en PPG es capaz de detectar cambios en la respuesta autonómica.
+
+En la presente práctica se estableció una captura de 120 s dividida en tres períodos: los primeros 40 s correspondieron al reposo inicial, los siguientes 40 s a la aplicación del CPT y los últimos 40 s al período de recuperación.
+
+### Materiales
+Para la construcción del sistema se utilizaron los elementos indicados en la guía de laboratorio:
+
+•  Arduino UNO o Arduino Nano.
+
+•  Protoboard.
+
+•  Sensor óptico TCRT1000.
+
+•  Resistencias.
+
+•  Amplificadores operacionales.
+
+•  Potenciómetros para ajuste de la señal.
+
+•  Cables de conexión.
+
+•  Computador.
+
+•  MATLAB.
+
+•  Recipiente con agua fría para la aplicación del Cold Pressor Test.
+
+
+El sensor óptico permitió transformar las variaciones del volumen sanguíneo periférico en una señal eléctrica. La señal fue acondicionada mediante el circuito construido en protoboard y posteriormente enviada a una entrada analógica del Arduino.
+
 ## METODOLOGIA
-### Revisión de la actividad electrodérmica
+### Circuito de adquisicion
 
-Inicialmente se realizó una revisión sobre la respuesta galvánica cutánea y su relación con el estrés. La GSR mide cambios en las propiedades eléctricas de la piel, principalmente asociados con la actividad de las glándulas sudoríparas ecrinas. La activación del sistema nervioso simpático puede producir un aumento de la sudoración y, por consiguiente, modificaciones en la conductancia de la piel [1], [3].
+Inicialmente se construyó sobre la protoboard el circuito indicado en la guía de laboratorio para la captura de las variaciones del volumen sanguíneo periférico. El circuito permitió acondicionar la señal producida por el sensor óptico antes de ser enviada al Arduino.
 
-La señal GSR puede analizarse mediante dos componentes principales:
+Posteriormente, el TCRT1000 fue configurado como sensor óptico de reflectancia. En esta configuración, la emisión y detección de la luz se realizan sobre la misma superficie del dedo, permitiendo detectar cambios asociados con la cantidad de sangre presente en el tejido.
 
- • Componente tónica o SCL (Skin Conductance Level): corresponde a la variación lenta de la señal y representa el nivel basal de conductancia.
- • Componente fásica o SCR (Skin Conductance Response): corresponde a cambios rápidos y transitorios producidos ante determinados estímulos o eventos [2], [4].
+El dedo del participante fue ubicado sobre el sensor procurando mantener una posición estable durante la adquisición. Los potenciómetros del circuito se ajustaron para obtener una señal con una amplitud suficiente y con la menor interferencia posible.
 
-Esta separación fue utilizada posteriormente en MATLAB para analizar los datos obtenidos.
+### Adquisición mediante Arduino
 
-### Consideraciones de seguridad eléctrica
+La salida del circuito fue conectada a una entrada analógica del Arduino. El microcontrolador se encargó de realizar la lectura de la señal y enviarla mediante comunicación serial al computador.
 
-La guía establece que la corriente aplicada al sujeto debe mantenerse por debajo de 1 mA. Para el diseño se utilizó una alimentación de 3,3 V, correspondiente al nivel de alimentación empleado por la ESP32.
+La adquisición se configuró a una frecuencia aproximada de 100 muestras por segundo, utilizando una comunicación serial de 9600 baudios. El registro completo tuvo una duración de 120 s.
 
-La condición extrema solicitada por la guía considera:
+La comunicación entre Arduino y MATLAB se realizó mediante el puerto serial. MATLAB permite establecer una conexión mediante serialport, configurar el terminador de las cadenas y realizar lecturas mediante readline [8], [9].
 
-Rskin = 0Ω
+### Organización temporal de la prueba
 
-Por esta razón, no es suficiente considerar únicamente la resistencia de la piel. Se debe incorporar una resistencia limitadora en serie que limite la corriente incluso en dicha condición.
+La prueba experimental se dividió de la siguiente manera:
 
-Aplicando la ley de Ohm:
+0–40 s: reposo inicial.
 
-I= V/R
-	​
-Para garantizar:
+40–80 s: aplicación del Cold Pressor Test.
 
-I≤1mA
+80–120 s: recuperación.
 
-con:
+Durante todo el procedimiento el dedo permaneció sobre el sensor para obtener una señal continua.
 
-V=3.3V
+La aplicación del CPT permitió generar una respuesta fisiológica asociada con la activación simpática. Esta respuesta se esperaba reflejada en cambios de la amplitud de la señal pletismográfica y del intervalo entre pulsaciones.
 
-se obtiene:
+### Procesamiento de la señal
 
-R≥ 3.3/0.001
+Una vez adquirida la señal, MATLAB realizó inicialmente una eliminación de datos no válidos. Posteriormente se aplicó un suavizado mediante una media móvil de cinco muestras:
 
-R≥3300Ω
+    senalSuave = movmean(senal,5);
 
-Por lo tanto, teóricamente se requiere como mínimo una resistencia de 3,3 kΩ bajo la condición extrema de cortocircuito de la piel. En la práctica se debe seleccionar un valor superior para disponer de margen de seguridad.
+El objetivo del suavizado fue reducir pequeñas fluctuaciones de la señal y facilitar la identificación de las pulsaciones.
 
-La consideración de la magnitud y duración de la corriente es coherente con la norma IEC 60479-1, que establece que los efectos fisiológicos de una corriente dependen, entre otros factores, de su magnitud, duración, trayectoria y de la impedancia del cuerpo [5].
+Posteriormente se realizó la búsqueda de máximos y mínimos mediante comparación entre muestras consecutivas. Para evitar que pequeñas fluctuaciones fueran interpretadas como pulsaciones independientes, se estableció una separación mínima entre detecciones.
 
-### Selección de la región anatómica
+Los máximos identificados representaron los puntos principales de cada pulsación. A partir de dos máximos consecutivos se calculó el intervalo entre latidos:
 
-Para la adquisición de GSR se utilizaron electrodos colocados sobre la mano. Las regiones palmares y los dedos son sitios tradicionalmente utilizados debido a la elevada densidad de glándulas sudoríparas ecrinas y a que producen señales electrodermales relativamente pronunciadas [6].
+\[
+HBI=t_i-t_{i-1}
+\]
 
-Los dedos presentan además una buena sensibilidad para detectar respuestas fásicas. Estudios experimentales han encontrado que las mediciones realizadas en los dedos presentan respuestas rápidas y una buena correlación dentro del mismo sujeto [7].
+La amplitud de cada pulsación se obtuvo mediante la diferencia entre el máximo de la pulsación y el mínimo correspondiente:
 
-Sin embargo, esta ubicación presenta una desventaja durante actividades como escribir o caminar, debido a que el movimiento de las manos puede introducir artefactos. Esta es una limitación conocida de los sistemas portátiles de EDA [7], [8].
+\[
+PPGA=PPG_{max}-PPG_{min}
+\]
 
-Por esta razón, durante las pruebas se procuró mantener los electrodos firmemente sujetos y reducir movimientos innecesarios durante la adquisición.
+La extracción de estas características es consistente con el procesamiento habitual de señales PPG, en las cuales los máximos y los intervalos entre pulsaciones permiten caracterizar la señal cardíaca [5].
 
-### Montaje del dispositivo
+### Normalización y cálculo del SPI
 
-El sistema desarrollado estuvo compuesto principalmente por:
+Después de obtener los valores de HBI y PPGA para cada pulsación, ambas variables fueron normalizadas mediante:
 
-• ESP32.
-• Sensor GSR.
-• Electrodos.
-• Cables de conexión.
-• Fuente de alimentación mediante power bank.
-• Computador con MATLAB.
-• Comunicación Bluetooth.
+\[
+PPGA_{norm}=100
+\frac{PPGA-\min(PPGA)}
+{\max(PPGA)-\min(PPGA)}
+\]
 
-El sensor GSR fue conectado a la ESP32 mediante:
+\[
+HBI_{norm}=100
+\frac{HBI-\min(HBI)}
+{\max(HBI)-\min(HBI)}
+\]
 
-VCC → 3,3 V
-GND → GND
-Salida del sensor → GPIO 34
+Posteriormente se calculó el SPI para cada latido mediante:
 
-El GPIO 34 fue utilizado como entrada analógica para realizar la adquisición de la señal.
+\[
+SPI=100-(0.7PPGA_{norm}+0.3HBI_{norm})
+\]
 
-La ESP32 realizó la lectura del valor analógico y posteriormente transmitió los datos mediante Bluetooth al computador.
-### Programación de la ESP32
+El resultado fue limitado al intervalo 0–100 para evitar valores fuera del rango establecido.
 
-Se utilizó la versión 2.0.11 del paquete ESP32 de Espressif Systems en Arduino IDE.
+Finalmente, MATLAB mostró para cada latido el tiempo de ocurrencia, HBI, PPGA y SPI. También se calcularon los promedios correspondientes a las tres etapas experimentales.
 
-El programa final se encargó de:
+### MATLAB
+El programa desarrollado se organizó en diferentes etapas.
 
-1. Inicializar la comunicación Bluetooth.
-2. Configurar el GPIO 34 como entrada analógica.
-3. Realizar continuamente la lectura del sensor GSR.
-4. Enviar el valor obtenido mediante Bluetooth.
-5. Mantener la adquisición durante la prueba.
+### Configuración
 
-La estructura fundamental empleada fue:
+En primer lugar se definieron el puerto serial, la velocidad de comunicación, la frecuencia de muestreo y la duración total:
 
-    #include "BluetoothSerial.h"
+	puerto = "COM12";
+	baud = 9600;
+	Fs = 100;
+	tiempoTotal = 120;
 
-    BluetoothSerial SerialBT;
+Esto permitió establecer las condiciones de adquisición antes de iniciar la comunicación con el Arduino.
 
-    const int GSR_PIN = 34;
-    
-    void setup()
-    {
-        Serial.begin(9600);
-        SerialBT.begin("GSR_ESP32");
-        analogReadResolution(10);
-    }
-    
-    void loop()
-    {
-        int gsr = analogRead(GSR_PIN);
+### Captura
 
-    SerialBT.println(gsr);
+La conexión se estableció mediante:
 
-    delay(20);
-    }
-La resolución del ADC se estableció en 10 bits, por lo que los valores adquiridos se encontraron aproximadamente entre 0 y 1023 ADC.
+	arduino = serialport(puerto,baud);
+	configureTerminator(arduino,"LF");
 
-La transmisión Bluetooth permitió eliminar la conexión física entre la ESP32 y el computador durante la adquisición final, utilizando la alimentación independiente mediante power bank.
+Posteriormente se utilizaron lecturas sucesivas mediante readline para almacenar los datos provenientes del Arduino. MATLAB documenta este procedimiento para recibir datos ASCII desde un dispositivo conectado mediante puerto serial [8], [9].
+
+La señal y el tiempo correspondiente se almacenaron en los vectores senal y tiempo.
+
+### Preprocesamiento
+
+Los datos inválidos fueron eliminados y posteriormente se aplicó un promedio móvil:
+
+	validos = ~isnan(senal);
+
+	senal = senal(validos);
+	tiempo = tiempo(validos);
+
+	senalSuave = movmean(senal,5);
+
+Esto permitió trabajar con una señal más estable para la identificación de pulsaciones.
+
+### Detección de máximos y mínimos
+
+El algoritmo recorrió la señal suavizada y comparó cada muestra con las muestras inmediatamente anterior y posterior. Si una muestra presentaba un valor superior a ambas, se clasificaba como máximo.
+
+De manera equivalente, si presentaba un valor inferior a las dos muestras vecinas, se clasificaba como mínimo.
+
+Además, se estableció una distancia mínima entre detecciones para reducir la aparición de múltiples máximos correspondientes a una misma pulsación.
+
+### Obtención de HBI y PPGA
+
+Con los máximos detectados se calcularon los intervalos entre latidos. Posteriormente se buscó el mínimo ubicado entre dos máximos consecutivos para determinar la amplitud de cada pulsación.
+
+El código también estableció límites fisiológicamente razonables para HBI y descartó detecciones cuya amplitud resultara negativa.
+
+### Cálculo del SPI
+
+Finalmente, los valores obtenidos fueron normalizados y utilizados en la ecuación del SPI:
+
+	SPI = 100 - (0.7*PPGA_n + 0.3*HBI_n);
+
+Este procedimiento permite obtener un valor de SPI asociado a cada pulsación.
+
+### Código de MATLAB
+
+	clear;
+	clc;
+	close all;
+	
+	%% CONFIGURACION
+	puerto = "COM12";
+	baud = 9600;
+	Fs = 100;
+	tiempoTotal = 120;
+	
+	%% CONEXION CON ARDUINO
+	arduino = serialport(puerto,baud);
+	configureTerminator(arduino,"LF");
+	flush(arduino);
+	
+	pause(2);
+	
+	%% CAPTURA DE LA SEÑAL
+	N = Fs*tiempoTotal;
+	
+	senal = zeros(N,1);
+	tiempo = zeros(N,1);
+	
+	disp("Iniciando captura...");
+	disp("0-40 s: reposo");
+	disp("40-80 s: CPT");
+	disp("80-120 s: recuperacion");
+	
+	tic;
+	
+	for i = 1:N
+	
+	    dato = readline(arduino);
+	    senal(i) = str2double(dato);
+	    tiempo(i) = toc;
+	
+	end
+	
+	clear arduino;
+	
+	disp("Captura terminada.");
+	
+	%% ELIMINAR DATOS INVALIDOS
+	validos = ~isnan(senal);
+	
+	senal = senal(validos);
+	tiempo = tiempo(validos);
+	
+	%% SUAVIZADO
+	senalSuave = movmean(senal,5);
+	
+	%% DETECCION DE MAXIMOS
+	maximos = [];
+	
+	for i = 2:length(senalSuave)-1
+	
+	    if senalSuave(i) > senalSuave(i-1) && ...
+	       senalSuave(i) > senalSuave(i+1)
+	
+	        if isempty(maximos) || ...
+	           i-maximos(end) > 45
+	
+	            maximos(end+1) = i;
+	
+	        end
+	    end
+	end
+	
+	%% DETECCION DE MINIMOS
+	minimos = [];
+	
+	for i = 2:length(senalSuave)-1
+	
+	    if senalSuave(i) < senalSuave(i-1) && ...
+	       senalSuave(i) < senalSuave(i+1)
+	
+	        if isempty(minimos) || ...
+	           i-minimos(end) > 45
+	
+	            minimos(end+1) = i;
+	
+	        end
+	    end
+	end
+	
+	%% CALCULO DE HBI Y PPGA
+	HBI = [];
+	PPGA = [];
+	tiempoLatido = [];
+	
+	for i = 2:length(maximos)
+	
+	    hbi = tiempo(maximos(i)) - ...
+	          tiempo(maximos(i-1));
+	
+	    minimo = minimos(minimos > maximos(i-1) & ...
+	                     minimos < maximos(i));
+	
+	    if ~isempty(minimo)
+	
+	        m = minimo(end);
+	
+	        ppga = senalSuave(maximos(i)) - ...
+	               senalSuave(m);
+	
+	        if hbi > 0.45 && hbi < 2.0 && ppga > 0
+	
+	            HBI(end+1) = hbi;
+	            PPGA(end+1) = ppga;
+	            tiempoLatido(end+1) = tiempo(maximos(i));
+	
+	        end
+	    end
+	end
+	
+	%% NORMALIZACION
+	PPGA_n = 100*(PPGA-min(PPGA)) / ...
+	              (max(PPGA)-min(PPGA));
+	
+	HBI_n = 100*(HBI-min(HBI)) / ...
+	             (max(HBI)-min(HBI));
+	
+	%% CALCULO DEL SPI
+	SPI = 100 - (0.7*PPGA_n + 0.3*HBI_n);
+	
+	SPI = max(0,min(100,SPI));
+	
+	%% MOSTRAR RESULTADOS
+	disp(" ");
+	disp("==============================================");
+	disp("             RESULTADOS DEL SPI");
+	disp("==============================================");
+	
+	for i = 1:length(SPI)
+	
+	    fprintf("Latido %d | Tiempo = %.2f s | HBI = %.3f s | PPGA = %.3f | SPI = %.2f\n", ...
+	        i,tiempoLatido(i),HBI(i),PPGA(i),SPI(i));
+	
+	end
+	
+	%% GRAFICA DE LA SEÑAL
+	figure;
+	
+	plot(tiempo,senal);
+	hold on;
+	
+	plot(tiempo(maximos),senalSuave(maximos),'o');
+	
+	xline(40,'--k','Inicio CPT');
+	xline(80,'--k','Fin CPT');
+	
+	xlabel("Tiempo (s)");
+	ylabel("Señal Arduino");
+	
+	title("Señal pletismográfica adquirida");
+	
+	legend("Señal","Máximos");
+	
+	grid on;
+	
+	%% GRAFICA DEL SPI
+	figure;
+	
+	plot(tiempoLatido,SPI,'-o');
+	
+	hold on;
+	
+	xline(40,'--k','Inicio CPT');
+	xline(80,'--k','Fin CPT');
+	
+	xlabel("Tiempo (s)");
+	ylabel("SPI");
+	
+	title("Evolución del SPI durante la prueba");
+	
+	ylim([0 100]);
+	
+	grid on;
+	
+	%% PROMEDIOS
+	SPI_reposo1 = SPI(tiempoLatido < 40);
+	
+	SPI_CPT = SPI(tiempoLatido >= 40 & ...
+	             tiempoLatido < 80);
+	
+	SPI_reposo2 = SPI(tiempoLatido >= 80);
+	
+	disp(" ");
+	disp("==============================================");
+	disp("             PROMEDIOS SPI");
+	disp("==============================================");
+	
+	fprintf("Reposo inicial : %.2f\n",mean(SPI_reposo1));
+	fprintf("CPT            : %.2f\n",mean(SPI_CPT));
+	fprintf("Recuperacion   : %.2f\n",mean(SPI_reposo2));
+
+### Adquisición y resultados 
+
+La adquisición de la señal pletismográfica se realizó durante un periodo total de 120 s. El registro se dividió en tres etapas: un periodo inicial de reposo entre 0 y 40 s, un periodo correspondiente a la aplicación del Cold Pressor Test entre 40 y 80 s y un periodo final de recuperación entre 80 y 120 s. Durante toda la adquisición se mantuvo el dedo del participante sobre el sensor óptico, permitiendo registrar las variaciones del volumen sanguíneo periférico.
+
+La señal obtenida presentó una componente pulsátil asociada con los cambios periódicos del volumen sanguíneo producidos por cada latido cardíaco. A partir de esta señal se identificaron los máximos y mínimos correspondientes a cada pulsación. Posteriormente, estos puntos fueron utilizados para obtener el intervalo entre latidos (HBI) y la amplitud de la onda pletismográfica (PPGA), variables necesarias para calcular el SPI [1], [2].
+
+<img width="686" height="527" alt="image" src="https://github.com/user-attachments/assets/a3c8fe2a-75ad-4278-ac12-2c663532875d" />
+
+
+Fig. 1. Señal pletismográfica registrada durante 120 s. Se muestran las variaciones de amplitud de la señal durante las etapas de reposo inicial, aplicación del Cold Pressor Test (CPT) y recuperación. Las líneas verticales permiten identificar los cambios entre las diferentes etapas de la prueba.
+
+La señal presenta una variación pulsátil continua durante todo el registro. También se observan cambios en la amplitud de las pulsaciones a lo largo del tiempo, particularmente alrededor del periodo correspondiente al CPT. Estos cambios son relevantes debido a que la amplitud de la señal pletismográfica está relacionada con las variaciones del volumen sanguíneo periférico y puede modificarse ante cambios en el tono vascular [1].
+
+<img width="692" height="521" alt="image" src="https://github.com/user-attachments/assets/85edc3b9-c218-43ff-8ef4-5fa51fd5986e" />
+
+
+Fig. 2. Señal pletismográfica con los latidos detectados mediante el algoritmo de procesamiento. Los marcadores representan los máximos identificados en cada pulsación y permiten determinar el instante de ocurrencia de los latidos y calcular posteriormente el intervalo HBI.
+
+La detección de los máximos permitió obtener los tiempos correspondientes a las pulsaciones. A partir de dos máximos consecutivos se calculó el HBI como la diferencia entre sus respectivos tiempos. De manera complementaria, los mínimos detectados permitieron estimar la amplitud de cada pulso mediante la diferencia entre el máximo y el mínimo correspondiente.
+
+<img width="647" height="522" alt="image" src="https://github.com/user-attachments/assets/f2eb5021-5b7e-4daa-8670-44f89b42e144" />
+
+
+Fig. 3. Evolución del índice pletismográfico quirúrgico (SPI) durante los 120 s de adquisición. Los puntos representan los valores calculados para cada latido y la línea de tendencia permite observar el comportamiento general del índice durante las etapas de reposo, CPT y recuperación.
+
+La evolución del SPI muestra un incremento durante el periodo asociado al CPT respecto al periodo inicial. Posteriormente, durante la recuperación, el índice presenta una disminución progresiva, aunque con variaciones entre latidos.
+
+### Resultados del calculo de SPI
+
+Durante el procesamiento se identificaron 162 latidos a lo largo del registro de 120 s. Para cada latido se obtuvo el tiempo de ocurrencia, el intervalo HBI, la amplitud PPGA y el valor correspondiente del SPI.
+
+Algunos valores obtenidos durante el procesamiento fueron:
+
+Latido 1   | Tiempo = 1.70 s  | HBI = 0.870 s | PPGA = 0.504 | SPI = 48.94
+Latido 2   | Tiempo = 2.41 s  | HBI = 0.710 s | PPGA = 0.696 | SPI = 35.69
+Latido 3   | Tiempo = 3.16 s  | HBI = 0.750 s | PPGA = 0.748 | SPI = 25.99
+...
+Latido 64  | Tiempo = 50.13 s | HBI = 0.650 s | PPGA = 0.391 | SPI = 79.75
+Latido 65  | Tiempo = 50.67 s | HBI = 0.540 s | PPGA = 0.432 | SPI = 82.52
+...
+Latido 81  | Tiempo = 61.41 s | HBI = 0.600 s | PPGA = 0.303 | SPI = 94.88
+...
+Latido 162 | Tiempo = 119.02 s| HBI = 0.710 s | PPGA = 0.708 | SPI = 34.05
+
+El comportamiento global se evaluó mediante el promedio del SPI en cada etapa de la prueba. Durante los primeros 40 s, correspondientes al reposo inicial, se obtuvo un SPI promedio de:
+
+\[
+SPI_{reposo}=35.31
+\]
+
+Durante el periodo correspondiente al CPT se obtuvo:
+
+\[
+SPI_{CPT}=64.09
+\]
+
+Finalmente, durante la etapa de recuperación se obtuvo:
+
+\[
+SPI_{recuperación}=48.19
+\]
+
+La frecuencia cardíaca promedio calculada a partir de los intervalos entre latidos fue de:
+
+\[
+FC_{prom}=83.39\;latidos/min
+\]
+
+El incremento entre el reposo inicial y el periodo CPT fue:
+
+\[
+\Delta SPI=64.09-35.31=28.78
+\]
+
+Por lo tanto, el SPI aumentó aproximadamente un 81.5 % con respecto al valor promedio del periodo inicial.
+
+### A
 
-### Comunicación inalámbrica
 
-Una vez programada la ESP32, se estableció la comunicación Bluetooth con el computador mediante el dispositivo denominado:
-
-  GSR_ESP32
-
-El computador creó un puerto COM asociado al enlace Bluetooth. MATLAB utilizó dicho puerto para recibir los datos enviados por la ESP32.
-
-Durante la configuración se presentaron inicialmente problemas con los puertos COM y con la conexión Bluetooth. Finalmente se consiguió establecer comunicación y recibir correctamente los valores GSR en MATLAB.
-
-### Adquisición y procesamiento en MATLAB
-
-MATLAB se utilizó para recibir los datos provenientes de la ESP32, generar la gráfica en tiempo real y almacenar los resultados.
-
-El programa se configuró para adquirir aproximadamente:
-
-  Fs = 50Hz
-
-durante:
-
-T=60s
-
-por lo que se esperaban aproximadamente:
-
-N=FsT = 50(60)=3000
-
-muestras.
-
-Los datos fueron almacenados en vectores de tiempo y GSR.
-
-Posteriormente se aplicó un suavizado mediante media móvil:
-
-    xf = movmean(x,10);
-
-Este procesamiento permitió reducir pequeñas fluctuaciones rápidas y facilitar la identificación de la tendencia general de la señal.
-
-A partir de la señal suavizada se estimó la componente tónica:
-
-    SCL = mean(xf);
-
-y se calculó una componente transitoria aproximada:
-
-    SCR = xf - SCL;
-
-De esta forma fue posible observar tanto la variación lenta de la señal como las respuestas transitorias.
-
-### Calibración
-
-Antes de realizar la prueba final se realizaron mediciones en reposo y durante actividades destinadas a producir cambios en la activación fisiológica.
-
-Durante las primeras pruebas se observaron valores cercanos a:
-
-• Mínimo: 934 ADC
-• Máximo: 971 ADC
-• Promedio: 947,85 ADC
-• SCL: 947,85 ADC
-• SCR máxima: 7,95 ADC
-
-Posteriormente se realizaron pruebas adicionales para establecer rangos de clasificación.
-
-Los datos experimentales mostraron que el valor absoluto de GSR podía desplazarse durante la prueba. Por este motivo, la clasificación no se interpretó únicamente como un valor fisiológico universal, sino como una clasificación experimental relativa a la línea base del sujeto.
-
-Esto es importante porque el nivel de conductancia puede variar entre individuos y también puede verse afectado por temperatura, humedad, movimiento, presión de los electrodos y condiciones de contacto [8], [9].
-
-### Clasificación del nivel de estrés
-
-Se implementó una clasificación experimental en MATLAB mediante tres niveles:
-
-• POCO
-• MODERADO
-• ELEVADO
-
-Los umbrales se determinaron a partir de los valores observados durante las pruebas de calibración y posteriormente se utilizaron en la prueba final.
-
-El programa recibía cada muestra y determinaba el nivel correspondiente. En la consola se mostraba, por ejemplo:
-
-      GSR: 928 ADC   Nivel: MODERADO
-      GSR: 916 ADC   Nivel: POCO
-      GSR: 893 ADC   Nivel: ELEVADO
-
-La clasificación se utilizó como indicador relativo de activación fisiológica y no como diagnóstico clínico de estrés.
-## RESULTADOS
-### Adquisición de la señal GSR
-
-El sistema consiguió adquirir la señal GSR mediante la ESP32 y transmitirla inalámbricamente al computador.
-
-Durante las primeras mediciones se observaron valores aproximadamente entre 934 y 971 ADC en condiciones de reposo.
-
-En las pruebas posteriores se observaron variaciones mayores. En una de las adquisiciones se registraron valores desde aproximadamente 1002 ADC hasta 939 ADC, mostrando una variación suficiente para diferenciar diferentes estados de activación.
 
 ### Respuesta durante reposo y respiración
 
-Durante las pruebas de respiración se observó que una inspiración rápida producía un cambio apreciable en la señal. Sin embargo, después del pico la señal no siempre regresaba exactamente al mismo valor inicial.
 
-Este comportamiento no necesariamente representa un error del sistema. La componente tónica de la EDA puede presentar cambios lentos y la recuperación de una respuesta fásica puede tomar tiempo [4]. Además, la señal puede verse afectada por la respiración, movimiento, contacto de los electrodos y otros factores fisiológicos [8].
-
-Por lo tanto, el retorno de la señal no debe interpretarse obligatoriamente como una recuperación instantánea hasta exactamente el mismo valor de reposo.
 
 ### Prueba de actividad cognitiva
 
-Durante la prueba final se observó un comportamiento más acorde con el objetivo de la práctica.
 
-En la consola se obtuvieron secuencias como:
-
-    GSR: 935 ADC   Nivel: ELEVADO
-    GSR: 928 ADC   Nivel: MODERADO
-    GSR: 916 ADC   Nivel: POCO
-
-Durante los momentos en los que se realizó una actividad mental que requería mayor concentración se observaron cambios en el nivel de la señal y clasificación como ELEVADO.
-
-Posteriormente, al disminuir la demanda cognitiva, la señal descendió gradualmente y pasó por los niveles MODERADO y POCO.
-
-Esto permitió observar cambios tanto ascendentes como descendentes de la señal durante una misma adquisición.
 
 ### Resultados de la prueba final
 
-Los resultados registrados fueron:
 
-  RESULTADOS PRUEBA GSR
-
-Parámetro	              Resultado
-Línea base	             992,03 ADC
-Mínimo                   939 ADC
-Máximo	                 1002 ADC
-Promedio	               958,40 ADC
-
-Los datos fueron almacenados en:
-
-• GSR_prueba_final.csv
-• GSR_prueba_final.mat
-
-La diferencia entre el máximo y mínimo registrado fue:
-
-ΔGSR=1002−939
-ΔGSR=63 ADC
-	​
-Este rango muestra que durante la prueba se produjo una variación considerable respecto al rango de fluctuación observado durante algunas condiciones de reposo.
 
 ### Componentes SCL y SCR
 
-La señal presentó una variación lenta de su nivel basal, correspondiente a la componente tónica o SCL, sobre la cual aparecieron variaciones rápidas asociadas con la componente fásica o SCR.
-
-Este comportamiento coincide con la descripción utilizada habitualmente en el análisis de EDA, donde el SCL representa cambios lentos mientras que las SCR representan respuestas transitorias ante eventos o estímulos [3], [4].
 
 ## ANÁLISIS DE RESULTADOS
-  Análisis 1. Eficacia del sistema para monitoreo ambulatorio
 
-El sistema desarrollado permitió realizar una medición continua y portátil de la respuesta galvánica cutánea y transmitir los datos de manera inalámbrica.
 
-Una de las principales ventajas fue que la ESP32 pudo funcionar alimentada mediante una power bank, evitando que el sujeto permaneciera conectado físicamente al computador.
-
-Los sistemas portátiles de EDA son una alternativa utilizada para realizar mediciones fuera de condiciones estrictamente de laboratorio; sin embargo, la calidad de la señal puede verse afectada por movimiento, colocación de electrodos, temperatura, humedad y otros factores [8], [10].
-
-Por lo tanto, el dispositivo desarrollado resulta apropiado como prototipo académico de monitoreo, aunque sería necesario realizar una validación más rigurosa antes de considerarlo un sistema de medición clínica.
-
-  Análisis 2. Alcance y limitaciones del sistema
-
-El principal alcance del sistema es permitir observar cambios relativos de la actividad electrodérmica durante diferentes situaciones.
-
-Los resultados obtenidos muestran que el sistema puede identificar cambios durante actividades cognitivas. Esto es consistente con investigaciones donde la EDA ha mostrado sensibilidad ante tareas que producen estrés cognitivo [11].
-
-Sin embargo, la GSR no mide directamente el estrés psicológico. La señal representa principalmente cambios relacionados con la activación autonómica y puede verse modificada por diferentes factores fisiológicos y ambientales [1], [8].
-
-Por ello, un aumento de GSR debe interpretarse como un aumento de activación fisiológica, y no necesariamente como una prueba definitiva de estrés.
 
 ### ¿Por qué la señal tarda en regresar a su nivel inicial?
 
-Durante las pruebas se observó que, después de producirse una respuesta elevada, la señal podía permanecer durante un tiempo en un nivel diferente antes de regresar hacia valores menores.
 
-Esto puede explicarse por la propia dinámica de la EDA. Las respuestas fásicas presentan una fase de aumento y posteriormente una fase de recuperación, mientras que el componente tónico puede cambiar lentamente durante períodos de varios segundos o minutos [4].
-
-Además, la recuperación puede verse afectada por el estado fisiológico del sujeto y por las condiciones de medición.
-
-Por tanto, que la señal no vuelva inmediatamente al valor inicial no implica necesariamente que el sensor esté funcionando incorrectamente.
 
 ### Relación entre actividad cognitiva y GSR
 
-Durante la prueba final se observó que, al realizar actividades que requerían mayor concentración, aparecieron periodos clasificados como ELEVADO.
 
-Posteriormente se observaron periodos MODERADOS y POCO cuando la activación disminuía.
-
-Este resultado es compatible con investigaciones que han demostrado sensibilidad de la EDA ante el estrés cognitivo [11]. La explicación fisiológica propuesta es que una tarea mental exigente puede aumentar la activación del sistema nervioso simpático, lo cual puede modificar la actividad de las glándulas sudoríparas y producir cambios en la conductancia cutánea [1], [3].
-
-No obstante, la respuesta no debe atribuirse exclusivamente al estrés, debido a que movimiento, respiración y otros factores también pueden generar variaciones en la EDA [8].
 
 ### Influencia del movimiento
 
-La señal presentó fluctuaciones durante algunas pruebas. Esto es especialmente relevante porque el sistema fue diseñado como dispositivo vestible.
 
-Los movimientos pueden modificar la presión y el contacto entre los electrodos y la piel, produciendo cambios que no necesariamente corresponden a una respuesta fisiológica real. La literatura identifica específicamente el movimiento como una de las fuentes importantes de artefactos en mediciones portátiles de EDA [8].
-
-Esto representa una de las principales limitaciones del prototipo.
 
 ### Hipótesis fisiológica
 
-A partir de los resultados obtenidos se plantea la siguiente hipótesis:
 
-Cuando una persona realiza una actividad que requiere mayor concentración o genera una mayor activación emocional, aumenta la activación del sistema nervioso simpático, lo que puede incrementar la actividad de las glándulas sudoríparas y producir cambios detectables en la conductancia de la piel.
 
-Esta hipótesis es coherente con la utilización de la EDA como indicador periférico de activación simpática [1], [3].
+## CONCLUSION
 
-## CONCLUSIONES
-1. Se desarrolló un prototipo vestible basado en una ESP32 y un sensor GSR, capaz de adquirir continuamente variaciones de la conductancia de la piel y transmitirlas inalámbricamente a MATLAB.
-2. Se identificaron las componentes tónica (SCL) y fásica (SCR) de la señal, observándose una variación lenta del nivel basal sobre la cual aparecieron respuestas transitorias.
-3. La prueba final presentó un rango experimental de 939 a 1002 ADC, con una diferencia máxima de 63 ADC, evidenciando que el sistema fue capaz de detectar cambios de la señal durante diferentes condiciones.
-4. Durante actividades cognitivas se observaron cambios en la señal y periodos clasificados como ELEVADO, seguidos posteriormente por estados MODERADOS y POCO, lo cual es compatible con la respuesta fisiológica esperada ante cambios en la activación simpática.
-5. Se comprobó que la señal no necesariamente retorna inmediatamente al mismo valor de línea base después de una respuesta elevada, debido a la dinámica de recuperación de la EDA y a factores fisiológicos y de medición.
-6. El sistema constituye un prototipo funcional para monitoreo académico de cambios relativos en la actividad electrodérmica. Sin embargo, la GSR por sí sola no permite establecer de manera absoluta el nivel psicológico de estrés, por lo que para aplicaciones más robustas sería conveniente combinarla con otras variables fisiológicas.
-7. El desarrollo permitió aplicar conceptos de instrumentación biomédica, adquisición de señales, procesamiento digital, comunicación inalámbrica y análisis fisiológico mediante un dispositivo embebido.
+
 ## REFERENCIAS
 
-[1] A. H. C. van der Kraaij et al., “Role and Status of Biomarkers in Technostress Research: A Systematic Review,” International Journal of Environmental Research and Public Health, 2024.
+[1] 
 
-[2] M. F. M. Al-Nafjan et al., “Smart Devices and Wearable Technologies to Detect and Monitor Mental Health Conditions and Stress: A Systematic Review,” Sensors, vol. 21, 2021.
+[2] 
 
-[3] A. Posada-Quintero and K. Chon, “Innovations in Electrodermal Activity Data Collection and Signal Processing: A Systematic Review,” Sensors, vol. 20, no. 2, 2020.
+[3] 
 
-[4] W. Boucsein et al., “Publication recommendations for electrodermal measurements,” Psychophysiology, vol. 49, no. 8, pp. 1017–1034, 2012, doi: 10.1111/j.1469-8986.2012.01384.x.
+[4] 
 
-[5] International Electrotechnical Commission, IEC 60479-1:2018, Effects of current on human beings and livestock—Part 1: General aspects, 2018.
+[5] 
 
-[6] R. McNaboe and H. Posada-Quintero, “Identifying Optimal Electrodermal Activity Locations in the Torso for Wearable Belt Monitors: Preliminary Results,” in Proc. 46th Annual International Conference of the IEEE Engineering in Medicine and Biology Society (EMBC), 2024, doi: 10.1109/EMBC53108.2024.10782573.
+[6] 
 
-[7] A. R. Posada-Quintero et al., “Comparison of Electrodermal Activity from Multiple Body Locations Based on Standard EDA Indices' Quality and Robustness against Motion Artifact,” Sensors, vol. 22, no. 9, 3177, 2022, doi: 10.3390/s22093177.
+[7] 
 
-[8] G. A. S. et al., “Electrodermal activity measurements: a review of artifacts,” Physiological Measurement, 2026, doi: 10.1088/1361-6579/ae7bae.
+[8] 
 
-[9] R. Picard et al., “A standardized validity assessment protocol for physiological signals from wearable technology: Methodological underpinnings and an application to the E4 biosensor,” Physiological Measurement, 2019.
+[9] 
 
-[10] M. H. van der Kooij et al., “Wearables measuring electrodermal activity to assess perceived stress in care: a scoping review,” 2023.
+[10] 
