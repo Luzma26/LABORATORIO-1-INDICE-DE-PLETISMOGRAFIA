@@ -45,7 +45,7 @@ En estudios experimentales, la inmersión de la mano en agua fría ha demostrado
 
 En la presente práctica se estableció una captura de 120 s dividida en tres períodos: los primeros 40 s correspondieron al reposo inicial, los siguientes 40 s a la aplicación del CPT y los últimos 40 s al período de recuperación.
 
-### Materiales
+## Materiales
 Para la construcción del sistema se utilizaron los elementos indicados en la guía de laboratorio:
 
 •  Arduino UNO o Arduino Nano.
@@ -68,6 +68,10 @@ Para la construcción del sistema se utilizaron los elementos indicados en la gu
 
 •  Recipiente con agua fría para la aplicación del Cold Pressor Test.
 
+
+<img width="377" height="263" alt="image" src="https://github.com/user-attachments/assets/d0762746-741e-4144-94b6-219f33099825" />
+
+Fig. 1. Montaje fisico
 
 El sensor óptico permitió transformar las variaciones del volumen sanguíneo periférico en una señal eléctrica. La señal fue acondicionada mediante el circuito construido en protoboard y posteriormente enviada a una entrada analógica del Arduino.
 
@@ -198,7 +202,7 @@ Finalmente, los valores obtenidos fueron normalizados y utilizados en la ecuaci�
 
 Este procedimiento permite obtener un valor de SPI asociado a cada pulsación.
 
-### Código de MATLAB
+## Código de MATLAB
 
 	clear;
 	clc;
@@ -396,7 +400,7 @@ Este procedimiento permite obtener un valor de SPI asociado a cada pulsación.
 	fprintf("CPT            : %.2f\n",mean(SPI_CPT));
 	fprintf("Recuperacion   : %.2f\n",mean(SPI_reposo2));
 
-### Adquisición y resultados 
+## Adquisición y resultados 
 
 La adquisición de la señal pletismográfica se realizó durante un periodo total de 120 s. El registro se dividió en tres etapas: un periodo inicial de reposo entre 0 y 40 s, un periodo correspondiente a la aplicación del Cold Pressor Test entre 40 y 80 s y un periodo final de recuperación entre 80 y 120 s. Durante toda la adquisición se mantuvo el dedo del participante sobre el sensor óptico, permitiendo registrar las variaciones del volumen sanguíneo periférico.
 
