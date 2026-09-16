@@ -29,11 +29,9 @@ El Surgical Pleth Index (SPI), inicialmente denominado Surgical Stress Index, fu
 
 La formulación utilizada en esta práctica corresponde a:
 
-\[
-SPI=100-(0.7PPGA_{norm}+0.3HBI_{norm})
-\]
+SPI = 100 - (0.7PPGA{norm} + 0.3HBI{norm})
 
-donde \(PPGA_{norm}\) corresponde a la amplitud de pulso normalizada y \(HBI_{norm}\) corresponde al intervalo entre latidos normalizado [2].
+donde (PPGA{norm}) corresponde a la amplitud de pulso normalizada y (HBI{norm}) corresponde al intervalo entre latidos normalizado [2].
 
 La normalización permite expresar ambas variables dentro de un rango común. De esta forma, el SPI obtenido también se encuentra entre 0 y 100. Un aumento del tono simpático puede producir vasoconstricción periférica y modificaciones de la frecuencia cardíaca, reduciendo la amplitud pletismográfica y el intervalo entre pulsaciones; estos cambios pueden conducir a un incremento del SPI [3].
 
@@ -116,15 +114,11 @@ Posteriormente se realizó la búsqueda de máximos y mínimos mediante comparac
 
 Los máximos identificados representaron los puntos principales de cada pulsación. A partir de dos máximos consecutivos se calculó el intervalo entre latidos:
 
-\[
-HBI=t_i-t_{i-1}
-\]
+HBI=t{i} - t{i-1}
 
 La amplitud de cada pulsación se obtuvo mediante la diferencia entre el máximo de la pulsación y el mínimo correspondiente:
 
-\[
-PPGA=PPG_{max}-PPG_{min}
-\]
+PPGA = PPG{max} - PPG{min}
 
 La extracción de estas características es consistente con el procesamiento habitual de señales PPG, en las cuales los máximos y los intervalos entre pulsaciones permiten caracterizar la señal cardíaca [5].
 
@@ -132,23 +126,13 @@ La extracción de estas características es consistente con el procesamiento hab
 
 Después de obtener los valores de HBI y PPGA para cada pulsación, ambas variables fueron normalizadas mediante:
 
-\[
-PPGA_{norm}=100
-\frac{PPGA-\min(PPGA)}
-{\max(PPGA)-\min(PPGA)}
-\]
+PPGA{norm}= 100 [PPGA - min(PPGA)] / [max(PPGA) - min(PPGA)]
 
-\[
-HBI_{norm}=100
-\frac{HBI-\min(HBI)}
-{\max(HBI)-\min(HBI)}
-\]
+HBI{norm} = 100 [HBI - min(HBI)] / [max(HBI) - min(HBI)]
 
 Posteriormente se calculó el SPI para cada latido mediante:
 
-\[
-SPI=100-(0.7PPGA_{norm}+0.3HBI_{norm})
-\]
+SPI = 100 - (0.7PPGA{norm} + 0.3HBI{norm})
 
 El resultado fue limitado al intervalo 0–100 para evitar valores fuera del rango establecido.
 
@@ -175,7 +159,7 @@ La conexión se estableció mediante:
 	arduino = serialport(puerto,baud);
 	configureTerminator(arduino,"LF");
 
-Posteriormente se utilizaron lecturas sucesivas mediante readline para almacenar los datos provenientes del Arduino. MATLAB documenta este procedimiento para recibir datos ASCII desde un dispositivo conectado mediante puerto serial [8], [9].
+Posteriormente se utilizaron lecturas sucesivas mediante readline para almacenar los datos provenientes del Arduino. MATLAB documenta este procedimiento para recibir datos ASCII desde un dispositivo conectado mediante puerto serial [8].
 
 La señal y el tiempo correspondiente se almacenaron en los vectores senal y tiempo.
 
@@ -421,21 +405,21 @@ La señal obtenida presentó una componente pulsátil asociada con los cambios p
 <img width="686" height="527" alt="image" src="https://github.com/user-attachments/assets/a3c8fe2a-75ad-4278-ac12-2c663532875d" />
 
 
-Fig. 1. Señal pletismográfica registrada durante 120 s. Se muestran las variaciones de amplitud de la señal durante las etapas de reposo inicial, aplicación del Cold Pressor Test (CPT) y recuperación. Las líneas verticales permiten identificar los cambios entre las diferentes etapas de la prueba.
+Fig. 2. Señal pletismográfica registrada durante 120 s. Se muestran las variaciones de amplitud de la señal durante las etapas de reposo inicial, aplicación del Cold Pressor Test (CPT) y recuperación. Las líneas verticales permiten identificar los cambios entre las diferentes etapas de la prueba.
 
 La señal presenta una variación pulsátil continua durante todo el registro. También se observan cambios en la amplitud de las pulsaciones a lo largo del tiempo, particularmente alrededor del periodo correspondiente al CPT. Estos cambios son relevantes debido a que la amplitud de la señal pletismográfica está relacionada con las variaciones del volumen sanguíneo periférico y puede modificarse ante cambios en el tono vascular [1].
 
 <img width="692" height="521" alt="image" src="https://github.com/user-attachments/assets/85edc3b9-c218-43ff-8ef4-5fa51fd5986e" />
 
 
-Fig. 2. Señal pletismográfica con los latidos detectados mediante el algoritmo de procesamiento. Los marcadores representan los máximos identificados en cada pulsación y permiten determinar el instante de ocurrencia de los latidos y calcular posteriormente el intervalo HBI.
+Fig. 3. Señal pletismográfica con los latidos detectados mediante el algoritmo de procesamiento. Los marcadores representan los máximos identificados en cada pulsación y permiten determinar el instante de ocurrencia de los latidos y calcular posteriormente el intervalo HBI.
 
 La detección de los máximos permitió obtener los tiempos correspondientes a las pulsaciones. A partir de dos máximos consecutivos se calculó el HBI como la diferencia entre sus respectivos tiempos. De manera complementaria, los mínimos detectados permitieron estimar la amplitud de cada pulso mediante la diferencia entre el máximo y el mínimo correspondiente.
 
 <img width="647" height="522" alt="image" src="https://github.com/user-attachments/assets/f2eb5021-5b7e-4daa-8670-44f89b42e144" />
 
 
-Fig. 3. Evolución del índice pletismográfico quirúrgico (SPI) durante los 120 s de adquisición. Los puntos representan los valores calculados para cada latido y la línea de tendencia permite observar el comportamiento general del índice durante las etapas de reposo, CPT y recuperación.
+Fig. 4. Evolución del índice pletismográfico quirúrgico (SPI) durante los 120 s de adquisición. Los puntos representan los valores calculados para cada latido y la línea de tendencia permite observar el comportamiento general del índice durante las etapas de reposo, CPT y recuperación.
 
 La evolución del SPI muestra un incremento durante el periodo asociado al CPT respecto al periodo inicial. Posteriormente, durante la recuperación, el índice presenta una disminución progresiva, aunque con variaciones entre latidos.
 
@@ -446,108 +430,103 @@ Durante el procesamiento se identificaron 162 latidos a lo largo del registro de
 Algunos valores obtenidos durante el procesamiento fueron:
 
 Latido 1   | Tiempo = 1.70 s  | HBI = 0.870 s | PPGA = 0.504 | SPI = 48.94
+
 Latido 2   | Tiempo = 2.41 s  | HBI = 0.710 s | PPGA = 0.696 | SPI = 35.69
+
 Latido 3   | Tiempo = 3.16 s  | HBI = 0.750 s | PPGA = 0.748 | SPI = 25.99
-...
+
 Latido 64  | Tiempo = 50.13 s | HBI = 0.650 s | PPGA = 0.391 | SPI = 79.75
+
 Latido 65  | Tiempo = 50.67 s | HBI = 0.540 s | PPGA = 0.432 | SPI = 82.52
-...
+
 Latido 81  | Tiempo = 61.41 s | HBI = 0.600 s | PPGA = 0.303 | SPI = 94.88
-...
+
 Latido 162 | Tiempo = 119.02 s| HBI = 0.710 s | PPGA = 0.708 | SPI = 34.05
 
 El comportamiento global se evaluó mediante el promedio del SPI en cada etapa de la prueba. Durante los primeros 40 s, correspondientes al reposo inicial, se obtuvo un SPI promedio de:
 
-\[
-SPI_{reposo}=35.31
-\]
+SPI{reposo} = 35.31
 
 Durante el periodo correspondiente al CPT se obtuvo:
 
-\[
-SPI_{CPT}=64.09
-\]
+SPI{CPT} = 64.09
 
 Finalmente, durante la etapa de recuperación se obtuvo:
 
-\[
-SPI_{recuperación}=48.19
-\]
+SPI{recuperación} = 48.19
 
 La frecuencia cardíaca promedio calculada a partir de los intervalos entre latidos fue de:
 
-\[
-FC_{prom}=83.39\;latidos/min
-\]
+FC{prom} = 83.39 latidos/min
 
 El incremento entre el reposo inicial y el periodo CPT fue:
 
-\[
-\Delta SPI=64.09-35.31=28.78
-\]
+Delta SPI = 64.09-35.31 = 28.78
 
 Por lo tanto, el SPI aumentó aproximadamente un 81.5 % con respecto al valor promedio del periodo inicial.
 
-### A
+## Análisis de resultados
 
+### Comportamiento del SPI durante el Cold Pressor Test
 
+Los resultados muestran una diferencia clara entre las tres etapas de la adquisición. Durante el reposo inicial se obtuvo un SPI promedio de 35.31. Durante el CPT, el valor aumentó hasta 64.09, mientras que durante la recuperación disminuyó nuevamente hasta 48.19.
 
-### Respuesta durante reposo y respiración
+El aumento observado durante el CPT es compatible con la respuesta autonómica esperada frente a un estímulo frío. El Cold Pressor Test produce activación del sistema nervioso simpático y puede generar modificaciones en la presión arterial, frecuencia cardíaca y respuesta vascular periférica [3]. Además, se ha reportado que la respuesta al CPT puede presentar una considerable variabilidad entre individuos [3].
 
+Desde el punto de vista de la señal utilizada en esta práctica, la respuesta tiene sentido debido a que el SPI combina información relacionada con la amplitud de la onda pletismográfica y el intervalo entre latidos. El SPI se encuentra definido como:
 
+SPI = 100 - (0.7PPGA{norm} + 0.3HBI{norm}) 
 
-### Prueba de actividad cognitiva
+donde (PPGA{norm}) corresponde a la amplitud pletismográfica normalizada y (HBI{norm}) al intervalo entre latidos normalizado [2], [4].
 
+El SPI es un índice adimensional entre 0 y 100, donde valores mayores se relacionan con una mayor respuesta de estrés autonómico/nociceptivo [2], [4].
 
+El comportamiento observado en la Figura 3 muestra que la respuesta no es completamente uniforme. Existen fluctuaciones importantes entre latidos, incluso dentro de una misma etapa. Esto puede deberse tanto a variaciones fisiológicas reales como a factores relacionados con la adquisición de la señal pletismográfica, como movimiento del dedo, presión sobre el sensor o cambios en la perfusión periférica [1].
 
-### Resultados de la prueba final
+### Comparación con valores utilizados durante cirugía
 
+El SPI fue desarrollado principalmente para la monitorización de la nocicepción durante procedimientos quirúrgicos bajo anestesia general. En este contexto se han utilizado valores aproximadamente entre 20 y 50 como referencia de una condición de analgesia considerada adecuada [4], [5].
 
+El valor promedio obtenido durante el reposo inicial, de 35.31, se encuentra dentro de este intervalo. Durante el CPT, en cambio, el promedio alcanzó 64.09, superando el rango de 20–50 utilizado habitualmente durante la monitorización intraoperatoria [4], [5].
 
-### Componentes SCL y SCR
+Este comportamiento concuerda con el propósito de la práctica, ya que el estímulo del CPT busca producir una respuesta fisiológica que permita evaluar si el sistema es capaz de detectar cambios en la actividad autonómica.
 
+Sin embargo, la comparación debe hacerse con cuidado. Los valores de referencia de SPI empleados durante una cirugía corresponden principalmente a pacientes sometidos a anestesia general y bajo condiciones clínicas controladas. En este laboratorio se analiza una respuesta fisiológica en condiciones ambulatorias, por lo que un SPI de 64.09 no puede interpretarse directamente como equivalente a un determinado nivel de dolor quirúrgico.
 
-## ANÁLISIS DE RESULTADOS
+De hecho, diferentes revisiones señalan que el SPI puede responder a estímulos nocivos, pero también puede verse afectado por factores distintos de la nocicepción, por lo que no debe considerarse una medida aislada y absoluta de dolor [4].
 
+### Alcance y limitaciones
 
+El sistema desarrollado permite realizar una estimación continua de cambios en la respuesta autonómica a partir de una señal pletismográfica obtenida de manera no invasiva. Una de sus principales ventajas es que permite obtener información latido a latido utilizando un sensor óptico relativamente sencillo y posteriormente procesarla mediante MATLAB.
 
-### ¿Por qué la señal tarda en regresar a su nivel inicial?
+El sistema también permite extraer características específicas de la señal, como el tiempo entre pulsaciones y la amplitud de cada pulso. Estas variables constituyen la base del cálculo del SPI y permiten transformar la señal pletismográfica en un indicador numérico de respuesta fisiológica [2].
 
+Sin embargo, el SPI no debe considerarse una medición directa de la percepción subjetiva del dolor. La señal pletismográfica puede verse modificada por diferentes factores fisiológicos y experimentales, incluyendo temperatura, movimiento, presión ejercida sobre el sensor, perfusión periférica y actividad autonómica no relacionada directamente con un estímulo doloroso [1], [4].
 
+Otra limitación corresponde a la variabilidad de la respuesta individual frente al CPT. Se ha demostrado que la magnitud de la respuesta cardiovascular y autonómica frente a este estímulo puede variar considerablemente entre personas [3]. Por esta razón, los resultados obtenidos deben interpretarse principalmente como una demostración del funcionamiento del sistema y de su capacidad para detectar cambios fisiológicos.
 
-### Relación entre actividad cognitiva y GSR
-
-
-
-### Influencia del movimiento
-
-
-
-### Hipótesis fisiológica
-
-
+Finalmente, el algoritmo de detección de máximos y mínimos depende de la calidad de la señal adquirida. Una señal con demasiado ruido, movimiento o cambios bruscos puede producir detecciones incorrectas y afectar el cálculo del HBI, PPGA y, por consiguiente, del SPI.
 
 ## CONCLUSION
 
+El sistema desarrollado permitió medir de forma continua la señal pletismográfica y obtener el SPI a partir de las variaciones de amplitud y del intervalo entre latidos. Durante la prueba de 120 s se obtuvo un SPI promedio de 35.31 en reposo, 64.09 durante el Cold Pressor Test y 48.19 durante la recuperación, evidenciando una respuesta del índice ante el estímulo aplicado. Estos resultados muestran que el procesamiento implementado permite extraer características de la onda de pulso y cuantificar cambios en la respuesta fisiológica de manera no invasiva. Como siguiente paso, sería necesario realizar adquisiciones en un mayor número de participantes y bajo diferentes condiciones experimentales para evaluar la reproducibilidad de la respuesta y establecer con mayor precisión el alcance del SPI como indicador de cambios asociados a estímulos nociceptivos.
 
 ## REFERENCIAS
 
-[1] 
+[1] J. Allen, “Photoplethysmography and its application in clinical physiological measurement,” Physiological Measurement, vol. 28, no. 3, pp. R1–R39, 2007. [Online]. Available: PubMed Central
 
-[2] 
+[2] M. Huiku et al., “Assessment of surgical stress during general anaesthesia,” British Journal of Anaesthesia, vol. 98, no. 4, pp. 447–455, 2007, doi: 10.1093/bja/aem004. [Online]. Available: PubMed
 
-[3] 
+[3] J. L. Wirch, L. A. Wolfe, T. L. Weissgerber, and G. A. L. Davies, “Cold pressor test protocol to evaluate cardiac autonomic function,” Applied Physiology, Nutrition, and Metabolism, vol. 31, no. 3, pp. 235–243, 2006, doi: 10.1139/h05-018. [Online]. Available: PubMed
 
-[4] 
+[4] M. Ledowski et al., “Surgical pleth index monitoring in perioperative pain management: usefulness and limitations,” Journal of Clinical Monitoring and Computing, 2023. [Online]. Available: PubMed Central
 
-[5] 
+[5] M. H. S. van den Oever et al., “Objective monitoring of nociception: a review of current commercial solutions,” Current Opinion in Anaesthesiology, vol. 33, no. 4, 2020. [Online]. Available: PubMed Central
 
-[6] 
+[6] M. Ledowski et al., “The quantification and monitoring of intraoperative nociception levels in thoracic surgery: a review,” Journal of Thoracic Disease, 2019. [Online]. Available: PubMed Central
 
-[7] 
+[7] GE HealthCare, Adequacy of Anesthesia: Surgical Pleth Index (SPI), GE HealthCare. El documento técnico de GE indica un rango objetivo de SPI de aproximadamente 20–50 como referencia de monitorización intraoperatoria.
+Documento técnico de GE HealthCare
 
-[8] 
-
-[9] 
-
-[10] 
+[8] M. M. R. F. Struys et al., “Changes in a surgical stress index in response to standardized pain stimuli during propofol-remifentanil infusion,” British Journal of Anaesthesia, vol. 99, no. 3, pp. 359–367, 2007, doi: 10.1093/bja/aem173.
+Artículo en PubMed
